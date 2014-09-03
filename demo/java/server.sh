@@ -1,0 +1,1 @@
+java -cp bin com.taobao.middleware.competition.server.Server $1 $2
