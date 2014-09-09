@@ -19,10 +19,13 @@ struct ThreadArgs
     int total_lines;
 };
 
-pthread_mutex_t work_mutex;
+//pthread_mutex_t work_mutex;
 
 static int current_line;
-
+static synchronized int getCurrentLine()
+{
+    return current_line++;
+}
 static char **lines_data;
 
 static int
@@ -132,12 +135,7 @@ connect_to_server(struct ThreadArgs* p)
 
     while(1)
     {
-        int c_line;
-        pthread_mutex_lock(&work_mutex);
-        c_line = current_line;
-        current_line ++;
-        pthread_mutex_unlock(&work_mutex);
-
+        int c_line=getCurrentLine();
         if (c_line > total_lines) break;
 
         ack_len = sprintf(ack, "%d", c_line);
@@ -172,7 +170,6 @@ connect_to_server(struct ThreadArgs* p)
 
 void *thread_main(void *thread_args)
 {
-
     struct ThreadArgs *p = (struct ThreadArgs *) thread_args;
 
     connect_to_server(p);
@@ -188,11 +185,9 @@ int main(int argc, char *argv[])
     char *serv_ip;              /* Server IP address (dotted quad) */
     unsigned short serv_port;   /* Server port */
 
-
     pthread_t *threadID;
     struct ThreadArgs thread_args;
     int thread_num = THREAD_NUM;
-
 
     if ((argc < 3 || argc > 4))
     {
@@ -223,7 +218,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    pthread_mutex_init(&work_mutex, NULL);
+ //   pthread_mutex_init(&work_mutex, NULL);
     current_line = 0;
 
     threadID = malloc(thread_num * sizeof(pthread_t));
@@ -242,25 +237,27 @@ int main(int argc, char *argv[])
         }
 
     }
-
-    /* Wait all client threads */
-    for (i=0; i<thread_num; i++)
-    {
-        void *ret;
-        pthread_join(threadID[i], &ret);
-    }
     for (i=0; i<total_lines; i++)
     {
         if(i<current_line)
             printf("%s\r\n", lines_data[i]);
         else Sleep(5);
     }
-    pthread_mutex_destroy(&work_mutex);
+
+    /* Wait all client threads */
+     /*
+    for (i=0; i<thread_num; i++)
+    {
+        void *ret;
+        pthread_join(threadID[i], &ret);
+    }
+*/
+//    pthread_mutex_destroy(&work_mutex);
 
     tend=clock();
-    double cost=(double)(tend-tstart)/(double)CLOCKS_PER_SEC;
+    double cost=(double)(tend-tstart)/CLOCKS_PER_SEC;
     printf("%.4f\r\n",cost);
-
+    exit(0);
     return 0;
 }
 

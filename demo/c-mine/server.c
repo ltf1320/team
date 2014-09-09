@@ -13,7 +13,7 @@
 #include <pthread.h>
 
 #include "common.h"
-
+//NOT NOW
 void *thread_readData(void *file)
 {
     read_data();
