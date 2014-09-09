@@ -13,6 +13,11 @@
 #include <pthread.h>
 
 #include "common.h"
+//TODO
+void *thread_readData(void *file)
+{
+    read_data();
+}
 
 static int
 create_tcp_server_socket (char *port)
@@ -65,33 +70,33 @@ create_tcp_server_socket (char *port)
 
 
 
-static int 
+static int
 accept_tcp_connection(int server_sock)
 {
     int client_sock;
     struct sockaddr_in client_addr;
     unsigned int client_addr_len = sizeof(client_addr);
-    
+
     /* Wait for a client to connect */
     if ((client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &client_addr_len)) < 0) {
         perror("accept() failed");
         return -1;
     }
-    
+
     /* client_sock is connected to a client! */
-    
-    printf("new client %s\n", inet_ntoa(client_addr.sin_addr));
+
+//    printf("new client %s\n", inet_ntoa(client_addr.sin_addr));
 
     return client_sock;
 }
 
 
-static void 
+static void
 handle_tcp_client(int client_sock)
 {
     #define BUFSIZE 32
     char recv_buf[BUFSIZE];
-    int recv_size;           
+    int recv_size;
 
     int i;
 
@@ -141,7 +146,7 @@ void *thread_main(void *thread_args)
     int client_sock;
 
     /* Guarantees that thread resources are deallocated upon return */
-    pthread_detach(pthread_self()); 
+    pthread_detach(pthread_self());
 
     client_sock = ((struct ThreadArgs *) thread_args) -> client_sock;
 
@@ -170,9 +175,9 @@ main (int argc, char *argv[])
         exit(-1);
     }
 
-    printf("Loading the data....\n");
+  //  printf("Loading the data....\n");
     read_data(argv[2]);
-    printf("Load the data successfully\n"); 
+    printf("Load the data successfully\n");
 
     for (;;) {
 
@@ -190,7 +195,7 @@ main (int argc, char *argv[])
             perror("pthread_create() failed");
             exit(EXIT_FAILURE);
         }
-        printf("with thread %ld\n", (long int) threadID);
+  //      printf("with thread %ld\n", (long int) threadID);
     }
 
 
