@@ -19,13 +19,10 @@ struct ThreadArgs
     int total_lines;
 };
 
-//pthread_mutex_t work_mutex;
+pthread_mutex_t work_mutex;
 
 static int current_line;
-static synchronized int getCurrentLine()
-{
-    return current_line++;
-}
+
 static char **lines_data;
 
 static int
@@ -135,7 +132,11 @@ connect_to_server(struct ThreadArgs* p)
 
     while(1)
     {
-        int c_line=getCurrentLine();
+        int c_line;
+        pthread_mutex_lock(&work_mutex);
+        c_line = current_line;
+        current_line ++;
+        pthread_mutex_unlock(&work_mutex);
         if (c_line > total_lines) break;
 
         ack_len = sprintf(ack, "%d", c_line);
@@ -218,7 +219,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
- //   pthread_mutex_init(&work_mutex, NULL);
+   pthread_mutex_init(&work_mutex, NULL);
     current_line = 0;
 
     threadID = malloc(thread_num * sizeof(pthread_t));
@@ -241,7 +242,7 @@ int main(int argc, char *argv[])
     {
         if(i<current_line)
             printf("%s\r\n", lines_data[i]);
-        else Sleep(5);
+        else sleep(5);
     }
 
     /* Wait all client threads */

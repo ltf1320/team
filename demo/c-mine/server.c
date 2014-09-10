@@ -16,7 +16,7 @@
 //NOT NOW
 void *thread_readData(void *file)
 {
-    read_data();
+    //read_data();
 }
 
 static int
